@@ -1,62 +1,45 @@
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 use std::thread;
-use std::pin::Pin;
 pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
+    let all_chars = input.join("");
+    let divisor = match worker_count {
+       0..=1 => 1,
+       _ => worker_count -1
+    };
+    let segment_size = all_chars.len() / divisor;
+    let segment_size = match segment_size{
+        0 => 1,
+        _ => segment_size,
+    };
+    print!("{} {} {}", all_chars.len(), segment_size, worker_count);
+    let mut all_chars = all_chars.chars().into_iter();
     let mut children = vec![];
-    let map_mutex: Arc<Mutex<HashMap<char, usize>>> = Arc::new(Mutex::new(HashMap::new()));
-    let count_mutex = Arc::new(Mutex::new(0));
-    let arc_input = Arc::new(Mutex::new(Pin::new(&input)));
 
-    for _ in 1..worker_count {
-        let clone_map = Arc::clone(&map_mutex);
-        let clone_count = Arc::clone(&count_mutex);
-        let clone_input = Arc::clone(&arc_input);
-        {
-            children.push(thread::spawn(move || {
-                loop {
-                    let guard = clone_count.lock();
-                    let mut output = match guard {
-                        Ok(guard) => guard,
-                        Err(_) => {
-                            continue;
-                        }
-                    };
-                    let current = *output;
-                    *output += 1;
-                    //drop(clone_count);
-                    let guard_input = match clone_input.lock() {
-                        Ok(guard) => guard,
-                        Err(_) => {
-                            continue;
-                        }
-                    };
-                    if current >= guard_input.len() {
-                        break;
-                    }
-                    let phrase = guard_input[current];
-                    //drop(clone_input);
-                    for c in phrase.chars() {
-                        loop {
-                            let mut map = match clone_map.lock() {
-                                Ok(guard) => guard,
-                                Err(_) => {
-                                    continue;
-                                }
-                            };
-                            let count = map.entry(c).or_insert(0);
-                            *count += 1;
-                            //drop(clone_map);
-                            break;
-                        }
-                    }
+    for _ in 0..worker_count {
+
+        let my_string: String = all_chars.by_ref().take(segment_size).collect();
+        children.push(thread::spawn(move || {
+            let mut map: HashMap<char, usize> = HashMap::new();
+            for c in my_string.chars().into_iter() {
+                if c.is_alphabetic() {
+                let e = map.entry(c.to_ascii_lowercase()).or_insert(0);
+                *e += 1;
                 }
-            }));
+            }
+
+            map
+        }));
+    }
+    let mut output = HashMap::new();
+    for child in children {
+        let map: HashMap<char, usize> = match child.join() {
+            Ok(m) => m,
+            Err(_) => HashMap::new(),
+        };
+        for (k, v) in map.iter() {
+            let curr = output.entry(*k).or_insert(0);
+            *curr += v;
         }
     }
-    for child in children {
-        let _ = child.join();
-    }
-    let x = &*map_mutex.lock().unwrap();
-    x.clone()
+    output
 }
