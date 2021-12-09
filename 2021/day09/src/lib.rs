@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{BufRead, BufReader},
+    io::{BufRead, BufReader}, collections::HashSet,
 };
 
 fn str_to_num_vec(input: &str) -> Vec<i32> {
@@ -22,6 +22,7 @@ fn test_first_part_sample_data() {
 }
 
 #[test]
+#[ignore]
 fn test_first_part_real_data() {
     let file = File::open("input.txt");
     match file {
@@ -41,7 +42,6 @@ fn test_second_part_sample_data() {
 }
 
 #[test]
-#[ignore]
 fn test_second_part_real_data() {
     let file = File::open("input.txt");
     match file {
@@ -109,6 +109,49 @@ fn process_file(file: File) {
     println!("Output: {}", sum_points(&matrix,&low_points) + low_points.len() as i32);
 }
 
+fn is_valid_point(matrix:&Vec<Vec<i32>>,point:&(i32,i32)) -> bool {
+     match matrix.get(point.0 as usize) {
+        Some(l) => match l.get(point.1 as usize) {
+            Some(n) => {
+                true
+            }
+            None => false,
+        },
+        None => false,
+    }
+}
+
+fn adjacent_basin(matrix:&Vec<Vec<i32>>,visited:&mut HashSet<(i32,i32)>,point:(i32,i32)) -> i32 {
+   if !visited.contains(&point) {
+        if is_valid_point(matrix,&point) {
+            visited.insert(*&point);
+            let curr = match matrix.get(point.0 as usize) {
+                Some(v) => {
+                    match v.get(point.1 as usize) {
+                        Some(v) => v,
+                        None => panic!("No Value!!"),
+                    }
+                },
+                None => panic!("No Value!!"),
+            };
+
+            if *curr < 9 {
+                let left = adjacent_basin(matrix, visited, (point.0 - 1,point.1));
+                let right = adjacent_basin(matrix, visited, (point.0 +1,point.1));
+                let up = adjacent_basin(matrix, visited, (point.0 ,point.1 -1));
+                let down = adjacent_basin(matrix, visited, (point.0 ,point.1 + 1));
+                return left + right + up + down + 1;
+            }
+
+        }
+   }
+   0
+}
+
+fn basin_size(matrix:&Vec<Vec<i32>>,visited:&mut HashSet<(i32,i32)>,point:(i32,i32)) -> i32 {
+    adjacent_basin(matrix, visited, point)
+}
+
 fn process_file_2(file: File) {
     let reader = BufReader::new(file);
     let lines = reader.lines();
@@ -117,6 +160,16 @@ fn process_file_2(file: File) {
         matrix.push(str_to_num_vec(&line));
     }
     let low_points = find_low_points(&matrix);
-
-    println!("Output: {}", sum_points(&matrix,&low_points) + low_points.len() as i32);
+    let mut product = 1;
+    let mut visited = HashSet::new();
+    let mut basins = Vec::new();
+    for point in low_points.iter() {
+        let size = basin_size(&matrix,&mut visited,*point);
+        basins.push(size);
+    }
+    basins.sort();
+    for n in basins.iter().rev().take(3){
+        product *= *n;
+    }
+    println!("Output: {}", product);
 }
