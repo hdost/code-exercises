@@ -15,7 +15,6 @@ fn test_first_part_sample_data() {
 }
 
 #[test]
-#[ignore]
 fn test_first_part_real_data() {
     let file = File::open("input.txt");
     match file {
@@ -36,7 +35,6 @@ fn test_second_part_sample_data() {
 }
 
 #[test]
-#[ignore]
 fn test_second_part_real_data() {
     let file = File::open("input.txt");
     match file {
@@ -50,7 +48,6 @@ fn test_second_part_real_data() {
 #[test]
 fn test_str_list_to_map() {
     let output = str_list_to_map(&"acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab");
-    println!("{:?}", output);
     assert_eq!(output.get("abcdefg"), Some(&'8'));
     assert_eq!(output.get("bcdef"), Some(&'5'));
     assert_eq!(output.get("acdfg"), Some(&'2'));
@@ -123,90 +120,81 @@ fn sorted_string(input: &str) -> String {
 // 4 = 4 segments
 // 7 = 3 segments
 // 8 = 7 segments
-//    0958575
+//    8687497
 //    abcdefg
 //  1 0010010
 //  4 0111010
-//  7 1010010  // has unique "d"
+//  7 1010010
 //
 //  8 1111111
 // 5 Seg
-//  2 1011101 // only one without "b"
+//  2 1011101  // Only one without f
 //  3 1011011
 //  5 1101011
 // 6 Seg
 //  0 1110111
-//  9 abcdefg
-//  6 abcdefg
+//  9 1111011
+//  6 1101111
 
 fn str_list_to_map(input: &str) -> HashMap<String, char> {
     let mut output = HashMap::new();
     // Get frequency count of each segment
     let freq_map = get_segment_frequencies(input);
-    // Seg Freq 10 = 'a"
-    let a = get_char_for_freq(&freq_map, 10);
-    // Seg Freq 9 = "b"
-    let b = get_char_for_freq(&freq_map, 9);
-    // Seg Freq 8 = "d"
-    let d = get_char_for_freq(&freq_map, 8);
-    // Seg Freq 7 = "f"
-    let f = get_char_for_freq(&freq_map, 7);
+    // Seg Freq 6 = "b"
+    let b = get_char_for_freq(&freq_map, 6);
+    // Seg Freq 4 = "e"
+    let e = get_char_for_freq(&freq_map, 4);
+    // Seg Freq 9 = "f"
+    let f = get_char_for_freq(&freq_map, 9);
     // Get length of each to determine sequence for:
     output.insert(get_seq_for_len(input, 2).unwrap(), '1');
     output.insert(get_seq_for_len(input, 4).unwrap(), '4');
     output.insert(get_seq_for_len(input, 3).unwrap(), '7');
     output.insert(get_seq_for_len(input, 7).unwrap(), '8');
-    let mut num_2 = String::new();
-    let mut len_5 = Vec::new();
-    let mut e = ' ';
+    let mut num_3 = String::new();
+    let mut num_5 = String::new();
+    let mut len_6 = Vec::new();
     for group in input.split_whitespace() {
-        if !group.contains(b) {
-            num_2 = sorted_string(group);
+        if !group.contains(f) {
             output.insert(sorted_string(group), '2');
-            let all_chars ="abcdefg";
-            for curr in all_chars.chars() {
-                if curr != b && !num_2.contains(curr){
-                    e = curr;
-                    break;
-                }
-            }
         } else {
             if group.len() == 5 {
-                len_5.push(group);
+                if group.contains(b) {
+                    num_5 = sorted_string(group);
+                    output.insert(num_5.clone(), '5');
+                } else {
+                    num_3 = sorted_string(group);
+                    output.insert(num_3.clone(), '3');
+                }
+            } else if group.len() == 6 {
+                if group.contains(e) {
+                    len_6.push(group);
+                } else {
+                    output.insert(sorted_string(group), '9');
+                }
             }
         }
     }
     // Find 3
-    let mut g = ' ';
-    while len_5.len() > 0 {
-        let group = len_5.pop().unwrap();
-        if !group.contains(b) {
-            let num_3 = sorted_string(group);
-            // find g
-            for c in num_2.chars() {
-                if !num_3.contains(c) {
-                    g = c;
+    while len_6.len() > 0 {
+        let group = len_6.pop().expect("Length of vector is greater than 0");
+        output.insert(
+            sorted_string(group),
+            |num_5: &str, num_3: &str| -> char {
+                for c in num_5.chars() {
+                    if !group.contains(c) {
+                        return '0';
+                    }
                 }
-            }
-            // add 3
-            output.insert(num_3, '3');
-        } else {
-            output.insert(sorted_string(group), '5');
-        }
+                for c in num_3.chars() {
+                    if !group.contains(c) {
+                        return '6';
+                    }
+                }
+                ' '
+            }(&num_5, &num_3),
+        );
     }
-    for group in input.split_whitespace() {
-        if group.len() == 6 {
-            let num = if !group.contains(f) {
-                '0'
-            } else if !group.contains(g) {
-                '9'
-            } else {
-                '6'
-            };
-            output.insert(sorted_string(group), num);
-        }
-    }
-
     output
 }
 
@@ -232,14 +220,15 @@ fn process_file_2(file: File) -> i32 {
     let mut sum = 0;
     for line in lines.flatten() {
         let mut parts = line.split('|');
-        let input = parts.next().unwrap();
+        let input = parts.next().expect("There should ");
         let output = parts.next().unwrap().split_whitespace();
         let map = str_list_to_map(input);
         let mut num_str = String::new();
-        for digit in output {
+        for digit in output{
             num_str.push(*map.get(&sorted_string(digit)).unwrap());
         }
-        sum += num_str.parse::<i32>().unwrap();
+        let curr_num = num_str.parse::<i32>().unwrap();
+        sum += curr_num;
     }
 
     sum
