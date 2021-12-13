@@ -4,66 +4,64 @@ use std::{
 };
 
 #[test]
-fn test_first_part_sample_data(){
+fn test_first_part_sample_data() {
     let file = File::open("test.txt");
     match file {
         Err(e) => println!("Cannot find file {}", e),
-        Ok(file) => process_file(file),
+        Ok(file) => {
+            assert_eq!(17, process_file(file));
+        }
     }
 }
 
 #[test]
 #[ignore]
-fn test_first_part_real_data(){
+fn test_first_part_real_data() {
     let file = File::open("input.txt");
     match file {
         Err(e) => println!("Cannot find file {}", e),
-        Ok(file) => process_file(file),
+        Ok(file) => {
+            assert_eq!(1, process_file(file));
+        }
     }
-
 }
 
 #[test]
 #[ignore]
-fn test_second_part_sample_data(){
+fn test_second_part_sample_data() {
     let file = File::open("test.txt");
     match file {
         Err(e) => println!("Cannot find file {}", e),
-        Ok(file) => process_file_2(file),
+        Ok(file) => {
+            assert_eq!(1, process_file_2(file));
+        }
     }
 }
 
 #[test]
 #[ignore]
-fn test_second_part_real_data(){
+fn test_second_part_real_data() {
     let file = File::open("input.txt");
     match file {
         Err(e) => println!("Cannot find file {}", e),
-        Ok(file) => process_file_2(file),
-    }
-
-}
-
-fn process_file(file: File) {
-    let reader = BufReader::new(file);
-    let lines = reader.lines();
-    let mut sums = Vec::new();
-    let mut max = 0;
-    for (i,line) in lines.enumerate() {
-        if let Ok(line) = line {
+        Ok(file) => {
+            assert_eq!(1, process_file_2(file));
         }
     }
-    println!("Output: {}", gamma * epsilon);
 }
 
-
-fn process_file_2(file: File) {
+fn process_file(file: File) -> i64 {
     let reader = BufReader::new(file);
     let lines = reader.lines();
-    for (i,line) in lines.enumerate() {
-        if let Ok(line) = line {
-        }
-    }
+    for line in lines.flatten() {}
 
-    println!("Output: {}", o2 * co2);
+    1
+}
+
+fn process_file_2(file: File) -> i64 {
+    let reader = BufReader::new(file);
+    let lines = reader.lines();
+    for line in lines.flatten() {}
+
+    1
 }
