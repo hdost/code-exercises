@@ -1,9 +1,10 @@
 use regex::Regex;
 use std::{
+    borrow::BorrowMut,
     collections::HashMap,
     fs::File,
     io::{BufRead, BufReader, Lines},
-    time::SystemTime, borrow::BorrowMut,
+    time::SystemTime,
 };
 
 #[macro_use]
@@ -92,17 +93,21 @@ fn test_count_chars_from_pairs() {
     pairs.insert("NN".to_string(), 1);
     pairs.insert("CB".to_string(), 1);
     let output = count_chars_from_pairs(&pairs);
-    assert_eq!(Some(&1),output.get(&'C'));
-    assert_eq!(Some(&3),output.get(&'N'));
-    assert_eq!(Some(&2),output.get(&'B'));
+    assert_eq!(Some(&1), output.get(&'C'));
+    assert_eq!(Some(&3), output.get(&'N'));
+    assert_eq!(Some(&2), output.get(&'B'));
 }
 
-fn count_chars_from_pairs(pairs: &HashMap<String,i64>) -> HashMap<char, i64> {
+fn count_chars_from_pairs(pairs: &HashMap<String, i64>) -> HashMap<char, i64> {
     let mut map = HashMap::new();
     for (pair, count) in pairs {
-        let l = map.entry(pair.chars().nth(0).expect("must have first char")).or_insert(0);
+        let l = map
+            .entry(pair.chars().nth(0).expect("must have first char"))
+            .or_insert(0);
         *l += count;
-        let r = map.entry(pair.chars().nth(1).expect("must have second char")).or_insert(0);
+        let r = map
+            .entry(pair.chars().nth(1).expect("must have second char"))
+            .or_insert(0);
         *r += count;
     }
     map
@@ -128,7 +133,7 @@ fn test_get_count_range() {
 }
 
 // Returns the lowest and highest
-fn get_count_range(map:HashMap<char,i64>) -> (i64, i64) {
+fn get_count_range(map: HashMap<char, i64>) -> (i64, i64) {
     println!("{:?}", map);
     let min = map
         .iter()
@@ -214,40 +219,45 @@ fn test_iterate_pairs() {
     pairs.insert("NC".to_string(), 1);
     pairs.insert("CB".to_string(), 1);
 
-
     let mut map = HashMap::new();
     map.insert("NN".to_string(), "C".to_string());
     map.insert("NC".to_string(), "B".to_string());
     map.insert("CB".to_string(), "H".to_string());
 
     let output = iterate_pairs(pairs, &map);
-    assert_eq!(Some(&1),output.get("NC"));
-    assert_eq!(Some(&1),output.get("CN"));
-    assert_eq!(Some(&1),output.get("NB"));
-
+    assert_eq!(Some(&1), output.get("NC"));
+    assert_eq!(Some(&1), output.get("CN"));
+    assert_eq!(Some(&1), output.get("NB"));
 }
 
-fn iterate_pairs(mut input: HashMap<String, i64>, mapping: &HashMap<String, String>) -> HashMap<String,i64> {
+fn iterate_pairs(
+    mut input: HashMap<String, i64>,
+    mapping: &HashMap<String, String>,
+) -> HashMap<String, i64> {
     let mut output = HashMap::new();
     for (k, count) in input.drain() {
         match mapping.get(&k) {
-            Some(target) =>  {
-                    let left_name = format!(
-                        "{}{}",
-                        k.chars().nth(0).expect("Should always have a first character."),
-                        target
-                    );
-                    let right_name = format!(
-                        "{}{}",
-                        target,
-                        k.chars().nth(1).expect("Should always have a second character.")
-                    );
+            Some(target) => {
+                let left_name = format!(
+                    "{}{}",
+                    k.chars()
+                        .nth(0)
+                        .expect("Should always have a first character."),
+                    target
+                );
+                let right_name = format!(
+                    "{}{}",
+                    target,
+                    k.chars()
+                        .nth(1)
+                        .expect("Should always have a second character.")
+                );
 
-                    let left_entry = output.entry(left_name).or_insert(0);
-                    *left_entry += count;
-                    let right_entry = output.entry(right_name).or_insert(0);
-                    *right_entry += count;
-            },
+                let left_entry = output.entry(left_name).or_insert(0);
+                *left_entry += count;
+                let right_entry = output.entry(right_name).or_insert(0);
+                *right_entry += count;
+            }
             None => {
                 let entry = output.entry(k).or_insert(0);
                 *entry += count;
@@ -287,11 +297,11 @@ pub fn process_file_2(file: File) -> i64 {
         println!("Step {} Start", i + 1);
         print_time_elapsed(&now);
         pairs = iterate_pairs(pairs, &mapping);
-        println!("{:?}",pairs);
+        println!("{:?}", pairs);
         println!("Step {} End", i + 1);
         print_time_elapsed(&now);
     }
     let count_map = count_chars_from_pairs(&pairs);
     let (low, high) = get_count_range(count_map);
-    high/2 - low/2 + 1
+    high / 2 - low / 2 + 1
 }
