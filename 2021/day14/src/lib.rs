@@ -279,11 +279,11 @@ pub fn process_file(file: File) -> i64 {
 pub fn process_file_2(file: File) -> i64 {
     let reader = BufReader::new(file);
     let lines = reader.lines();
-    let (mut seq, mapping) = process_lines(lines);
+    let (seq, mapping) = process_lines(lines);
     let mut pairs = generate_pairs(&seq);
 
     let now = SystemTime::now();
-    for i in 1..40 {
+    for i in 0..40 {
         println!("Step {} Start", i + 1);
         print_time_elapsed(&now);
         pairs = iterate_pairs(pairs, &mapping);
@@ -293,5 +293,5 @@ pub fn process_file_2(file: File) -> i64 {
     }
     let count_map = count_chars_from_pairs(&pairs);
     let (low, high) = get_count_range(count_map);
-    high - low
+    high/2 - low/2 + 1
 }
