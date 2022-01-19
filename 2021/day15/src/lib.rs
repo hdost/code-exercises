@@ -15,7 +15,6 @@ fn test_first_part_sample_data() {
 }
 
 #[test]
-#[ignore]
 fn test_first_part_real_data() {
     let file = File::open("input.txt");
     match file {
@@ -27,7 +26,6 @@ fn test_first_part_real_data() {
 }
 
 #[test]
-#[ignore]
 fn test_second_part_sample_data() {
     let file = File::open("test.txt");
     match file {
@@ -39,7 +37,6 @@ fn test_second_part_sample_data() {
 }
 
 #[test]
-#[ignore]
 fn test_second_part_real_data() {
     let file = File::open("input.txt");
     match file {
@@ -50,10 +47,20 @@ fn test_second_part_real_data() {
     }
 }
 
+fn str_to_num_vec(input: &str) -> Vec<i32> {
+    let mut output = Vec::new();
+    for c in input.chars() {
+        output.push(c as i32 - 48);
+    }
+    output
+}
 fn process_file(file: File) -> i64 {
     let reader = BufReader::new(file);
     let lines = reader.lines();
-    for line in lines.flatten() {}
+    let mut matrix = Vec::new();
+    for line in lines.flatten() {
+        matrix.push(str_to_num_vec(&line));
+    }
 
     1
 }
