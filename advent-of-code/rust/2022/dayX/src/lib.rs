@@ -65,4 +65,3 @@ fn test_second_part_real_data() {
         }
     }
 }
-

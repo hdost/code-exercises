@@ -46,46 +46,33 @@ impl HandShape {
     /// - Scissors defeats Paper
     /// - Paper defeats Rock
     fn score(&self, opponent: HandShape) -> i64 {
-        match self {
-            HandShape::Rock => match opponent {
-                HandShape::Rock => 3,
-                HandShape::Paper => 0,
-                HandShape::Scissors => 6,
-            },
-            HandShape::Paper => match opponent {
-                HandShape::Rock => 6,
-                HandShape::Paper => 3,
-                HandShape::Scissors => 0,
-            },
-            HandShape::Scissors => match opponent {
-                HandShape::Rock => 0,
-                HandShape::Paper => 6,
-                HandShape::Scissors => 3,
-            },
+        match (self, opponent) {
+            (HandShape::Rock, HandShape::Rock) => 3,
+            (HandShape::Rock, HandShape::Paper) => 0,
+            (HandShape::Rock, HandShape::Scissors) => 6,
+            (HandShape::Paper, HandShape::Rock) => 6,
+            (HandShape::Paper, HandShape::Paper) => 3,
+            (HandShape::Paper, HandShape::Scissors) => 0,
+            (HandShape::Scissors, HandShape::Rock) => 0,
+            (HandShape::Scissors, HandShape::Paper) => 6,
+            (HandShape::Scissors, HandShape::Scissors) => 3,
         }
     }
 
     /// This determines what shape to chose in when you know what your opponent has chosen and
     /// you want a particular outcome to occur
     fn find_shape(&self, outcome: &RoundOutcome) -> HandShape {
-        match self {
-            HandShape::Rock => match outcome {
-                RoundOutcome::Draw => HandShape::Rock,
-                RoundOutcome::Win => HandShape::Paper,
-                RoundOutcome::Loss => HandShape::Scissors,
-            },
-            HandShape::Paper => match outcome {
-                RoundOutcome::Draw => HandShape::Paper,
-                RoundOutcome::Win => HandShape::Scissors,
-                RoundOutcome::Loss => HandShape::Rock,
-            },
-            HandShape::Scissors => match outcome {
-                RoundOutcome::Draw => HandShape::Scissors,
-                RoundOutcome::Win => HandShape::Rock,
-                RoundOutcome::Loss => HandShape::Paper,
-            },
+        match (self, outcome) {
+            (HandShape::Rock, RoundOutcome::Draw) => HandShape::Rock,
+            (HandShape::Rock, RoundOutcome::Win) => HandShape::Paper,
+            (HandShape::Rock, RoundOutcome::Loss) => HandShape::Scissors,
+            (HandShape::Paper, RoundOutcome::Draw) => HandShape::Paper,
+            (HandShape::Paper, RoundOutcome::Win) => HandShape::Scissors,
+            (HandShape::Paper, RoundOutcome::Loss) => HandShape::Rock,
+            (HandShape::Scissors, RoundOutcome::Draw) => HandShape::Scissors,
+            (HandShape::Scissors, RoundOutcome::Win) => HandShape::Rock,
+            (HandShape::Scissors, RoundOutcome::Loss) => HandShape::Paper,
         }
-
     }
 }
 
@@ -95,7 +82,6 @@ enum RoundOutcome {
     Draw,
 }
 impl RoundOutcome {
-
     fn from<T>(input: &T) -> RoundOutcome
     where
         T: AsRef<str> + Debug + ?Sized,

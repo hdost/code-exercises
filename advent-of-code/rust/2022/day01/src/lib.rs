@@ -56,8 +56,7 @@ fn process_file(file: File) -> i64 {
     for line in lines.flatten() {
         if let Ok(food) = line.parse::<i64>() {
             elf += food;
-        }
-        else{
+        } else {
             if elf > 0 {
                 if elf > max_elf {
                     max_elf = elf;
@@ -79,14 +78,13 @@ fn process_file_2(file: File) -> i64 {
     for line in lines.flatten() {
         if let Ok(food) = line.parse::<i64>() {
             elf += food;
-        }
-        else{
+        } else {
             if elf > 0 {
                 elves.push(elf);
                 elf = 0;
             }
         }
     }
-    elves.sort_by(|a,b| b.cmp(a));
+    elves.sort_by(|a, b| b.cmp(a));
     elves[..3].iter().sum()
 }
