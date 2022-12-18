@@ -3,6 +3,7 @@ use std::{
     io::{BufRead, BufReader},
 };
 
+#[allow(dead_code)]
 fn process_file(file: File) -> i64 {
     let reader = BufReader::new(file);
     let lines = reader.lines();
@@ -11,6 +12,7 @@ fn process_file(file: File) -> i64 {
     1
 }
 
+#[allow(dead_code)]
 fn process_file_2(file: File) -> i64 {
     let reader = BufReader::new(file);
     let lines = reader.lines();
