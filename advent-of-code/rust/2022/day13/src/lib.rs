@@ -6,8 +6,8 @@ use std::{
 fn process_file(file: File) -> i64 {
     let reader = BufReader::new(file);
     let lines = reader.lines();
-    for line in lines.flatten() {}
-
+    for line in lines.flatten() {
+    }
     1
 }
 
@@ -15,7 +15,6 @@ fn process_file_2(file: File) -> i64 {
     let reader = BufReader::new(file);
     let lines = reader.lines();
     for line in lines.flatten() {}
-
     1
 }
 
